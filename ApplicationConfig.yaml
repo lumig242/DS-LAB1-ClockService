@@ -1,0 +1,20 @@
+# Defines which nodes are used in the system and how to connect to them.
+# This element should only be referenced during the constructor's initial
+# setup.
+# All names must be unique.
+# No other nodes are known.
+# These names will be used for src and dest addresses for the Message
+# The local node’s name is included in this list
+name :
+  alice
+
+send :
+  - dest   : bob
+    data   : hi
+    kind   : reply
+  - dest   : bob
+    data   : hi
+    kind   : reply  
+  - dest   : bob
+    data   : hi
+    kind   : reply
