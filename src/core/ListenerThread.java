@@ -1,10 +1,6 @@
 package core;
 
-import java.util.concurrent.LinkedBlockingQueue;
-
-import config.ConfigParser;
 import config.Message;
-import config.Rule;
 import config.Server;
 
 /**
@@ -14,15 +10,9 @@ import config.Server;
  */
 public class ListenerThread implements Runnable {
     private Server server;
-    LinkedBlockingQueue<Message> receiveMsgs = new LinkedBlockingQueue<Message>();
-    private LinkedBlockingQueue<Message> delayReceiveMsgs = new LinkedBlockingQueue<Message>();
-    ConfigParser config;
     
-    public ListenerThread(Server server, LinkedBlockingQueue<Message> receiveMsgs, LinkedBlockingQueue<Message> delayReceiveMsgs, ConfigParser config){  
+    public ListenerThread(Server server){  
         this.server = server;  
-        this.receiveMsgs = receiveMsgs;
-        this.delayReceiveMsgs = delayReceiveMsgs;
-        this.config = config;
     }
     
     /**
@@ -33,25 +23,7 @@ public class ListenerThread implements Runnable {
     	try{
             while(true){  
             	Message msg = (Message) server.getInput().readObject();
-            	if(!config.isUpToDate()) {
-    				config.reconfiguration();
-    			}
-            	Rule rule = config.matchReceiveRule(msg.getSource(), msg.getDest(), msg.getKind(), msg.get_seqNum());
-            	if(rule == null) {
-	                receiveMsgs.put(msg);
-	                while(!delayReceiveMsgs.isEmpty()) {
-	                	receiveMsgs.put(delayReceiveMsgs.poll());
-	                }
-            	} else {
-            		switch(rule.getAction().toLowerCase()) {
-            			case "drop" : {break;}
-            			case "dropafter" : {break;}
-            			case "delay" : {
-            				delayReceiveMsgs.put(msg);
-            			}
-            		}
-            	}
-                
+            	MessagePasser.controller.handleReceiveMessgae(msg);
             }    
         }catch(Exception e){  
             e.printStackTrace();  

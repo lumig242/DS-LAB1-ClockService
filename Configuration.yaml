@@ -28,3 +28,5 @@ receiveRules :
   - action : dropAfter
     dest   : daphnie
     seqNum : 4
+
+processSize: 4

@@ -21,9 +21,11 @@ public class ConfigParser {
 	private Map<String, Server> servers = new HashMap<>();
 	private List<Rule> sendRules = new ArrayList<>();
 	private List<Rule> receiveRules = new ArrayList<>();
+	private List<String> serverNameList = new ArrayList<>();
 	private String filename;
 	private static long CONFIG_FILE_LAST_MODIFIED;
 	private File configFile;
+	private int processSize;
 	
 	@SuppressWarnings("unchecked")
 	public ConfigParser(String filename){
@@ -39,13 +41,17 @@ public class ConfigParser {
 			return;
 		}
 		//Map map = (Map) yaml.load(input);
-		Map<String, List<Map<String, Object>>> values = (Map<String, List<Map<String, Object>>>) yaml.load(input);
-		parseServers(values.get("configuration"), servers);
-		parseRules(values.get("sendRules"), sendRules);
-		parseRules(values.get("receiveRules"), receiveRules);
-		//System.out.println(servers);
-		//System.out.println(sendRules);
-		//System.out.println(receiveRules);
+		//Map<String, List<Map<String, Object>>> values = (Map<String, List<Map<String, Object>>>) yaml.load(input);
+		Map<String, Object> values = (Map<String,Object>) yaml.load(input);
+		
+		parseServers((List<Map<String, Object>>)values.get("configuration"), servers);
+		parseRules((List<Map<String, Object>>)values.get("sendRules"), sendRules);
+		parseRules((List<Map<String, Object>>)values.get("receiveRules"), receiveRules);
+		processSize = (int) values.get("processSize");
+		System.out.println(servers);
+		System.out.println(sendRules);
+		System.out.println(receiveRules);
+		System.out.println(processSize);
 	}
 	
 	/**
@@ -82,6 +88,10 @@ public class ConfigParser {
 		return servers.get(serverName);
 	}
 	
+	public int getIndex(String serverName){
+		return serverNameList.indexOf(serverName);
+	}
+	
 	/**
 	 * Check if the given message matches a rule
 	 */
@@ -114,6 +124,7 @@ public class ConfigParser {
 			server.setIp((String)item.get("ip"));
 			server.setPort((Integer)item.get("port"));
 			servers.put(server.getName(), server);
+			serverNameList.add(server.getName());
 		}
 	}
 
@@ -150,6 +161,14 @@ public class ConfigParser {
 
 	public void setFilename(String filename) {
 		this.filename = filename;
+	}
+
+	public int getProcessSize() {
+		return processSize;
+	}
+
+	public void setProcessSize(int processSize) {
+		this.processSize = processSize;
 	}
 	
 	

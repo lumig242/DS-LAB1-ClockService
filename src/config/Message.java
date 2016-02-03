@@ -9,6 +9,8 @@ public class Message implements Serializable{
 	private static final long serialVersionUID = 1L;
 	private Header header;// there is no source in header 												???
 	private Object payload;
+	private Timestamp timestamp;
+	
 	
 	@Override
 	public String toString() {
@@ -23,6 +25,8 @@ public class Message implements Serializable{
 		this.header = new Header(dest, kind);
 		this.payload = payload;
 	}
+	
+	
 	
 	public Object getPayload() {
 		return this.payload;
@@ -60,10 +64,15 @@ public class Message implements Serializable{
 		this.header.setDuplicate(flag);
 	}
 	
+	public Timestamp getTimestamp() {
+		return timestamp;
+	}
+
+	public void setTimestamp(Timestamp timestamp) {
+		this.timestamp = timestamp;
+	}
+	
 	private class Header implements Serializable {
-		/**
-		 * 
-		 */
 		private static final long serialVersionUID = 1L;
 		private String dest;
 		private String source;
@@ -117,4 +126,6 @@ public class Message implements Serializable{
 			this.duplicate = flag;
 		}
 	}
+
+	
 }

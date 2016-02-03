@@ -6,9 +6,10 @@ import java.io.ObjectOutputStream;
 import java.net.*;
 import java.util.concurrent.LinkedBlockingQueue;
 
+import clockService.Clock;
+import clockService.ClockFactory;
 import config.ConfigParser;
 import config.Message;
-import config.Rule;
 import config.Server;
 
 /**
@@ -18,19 +19,32 @@ import config.Server;
  */
 public class MessagePasser {
 	private Server localServer;
+	public static Controller controller;
+	public static Clock clock;
 	private LinkedBlockingQueue<Message> sendMsgs = new LinkedBlockingQueue<Message>();
 	private LinkedBlockingQueue<Message> delaySendMsgs = new LinkedBlockingQueue<Message>();
 	private LinkedBlockingQueue<Message> receiveMsgs = new LinkedBlockingQueue<Message>();
 	private LinkedBlockingQueue<Message> delayReceiveMsgs = new LinkedBlockingQueue<Message>();
-
+	
 	ConfigParser config;
 	private int sequenceNumber = 0;
 	
 	public MessagePasser(String configuration_filename, String local_name){
+		//Use logical clock as default
+		this(configuration_filename, local_name, "logic");
+	}
+	
+	public MessagePasser(String configuration_filename, String local_name, String clockType){
 		// Parse the Yaml configuration file
 		config = new ConfigParser(configuration_filename);
+		if(clockType.equals("logic")){
+			clock = ClockFactory.getClockInstance(clockType);
+		}else{
+			// TODO parse vector clock process size& current process ID in the config class
+			clock = ClockFactory.getClockInstance(clockType, config.getProcessSize(), config.getIndex(local_name));
+		}
 		localServer = config.getServer(local_name);
-		
+		controller = new Controller(config, receiveMsgs, delayReceiveMsgs, sendMsgs, delaySendMsgs);
 		// Start the thread to keep listening on port
 		// Start separate thread for all the clients connected
 		Thread t = new Thread(new Runnable() {
@@ -47,33 +61,15 @@ public class MessagePasser {
 						// Set the input output stream for this node
 			        	ObjectOutputStream output = new ObjectOutputStream(client.getOutputStream());
 			        	ObjectInputStream input = new ObjectInputStream(client.getInputStream());
+			        
 			        	// We have to read the first message to get the name of client
 			        	Message msg =  (Message) input.readObject();
-			        	if(!config.isUpToDate()) {
-							config.reconfiguration();
-						}
-			        	Rule rule = config.matchReceiveRule(msg.getSource(), msg.getDest(), msg.getKind(), msg.get_seqNum());
-			        	if(rule == null) {
-			        		// Put the first message in the queue
-			                //System.out.println(msg + "receive");
-			                receiveMsgs.put(msg);
-			                //System.out.println(receiveMsgs);
-			                
-			                while(!delayReceiveMsgs.isEmpty()) {
-			                	receiveMsgs.put(delayReceiveMsgs.poll());
-			                }
-		            	} else {
-		            		switch(rule.getAction().toLowerCase()) {
-		            			case "drop" : {break;}
-		            			case "dropafter" : {break;}
-		            			case "delay" : {
-		            				delayReceiveMsgs.put(msg);
-		            			}
-		            		}
-		            	}
+			        	
+			        	// Handle the first receive message
+			        	controller.handleReceiveMessgae(msg);
+			        
 			        	Server server = config.getServer(msg.getSource());
 			        	System.out.println("Connected client!  " + server);
-						
 						/**
 						 * Trick thing here. To avoid race condition that two server are connecting to 
 						 * each other at the same time and thus construct two tcp connection
@@ -85,7 +81,7 @@ public class MessagePasser {
 		                	server.setOutput(output);
 							server.setInput(input);
 							// Start a new thread to listen from the node
-							new Thread(new ListenerThread(server, receiveMsgs, delayReceiveMsgs, config)).start();
+							new Thread(new ListenerThread(server)).start();
 						}
 					}
 				} catch (IOException | ClassNotFoundException | InterruptedException e) {
@@ -125,7 +121,7 @@ public class MessagePasser {
 				ObjectOutputStream outputStream = new ObjectOutputStream(socket.getOutputStream());
 				destServer.setInput(inputStream);
 				destServer.setOutput(outputStream);
-				new Thread(new ListenerThread(destServer, receiveMsgs, delayReceiveMsgs, config)).start();
+				new Thread(new ListenerThread(destServer)).start();
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
@@ -134,28 +130,7 @@ public class MessagePasser {
 		// Put the msg into queue
 		try {
 			message.set_seqNum(sequenceNumber++);
-			if(!config.isUpToDate()) {
-				config.reconfiguration();
-			}
-			Rule rule = config.matchSendRule(message.getSource(), message.getDest(), message.getKind(), message.get_seqNum());
-			//System.out.println("Rule:" + rule);
-			if(rule == null) {
-				sendMsgs.put(message);
-				//all delayed messages are triggered to send
-				while(!delaySendMsgs.isEmpty()) {
-					sendMsgs.put(delaySendMsgs.poll());
-				}
-			} else {
-				switch(rule.getAction().toLowerCase()) {
-				    case "drop" :{return;}
-				    case "dropafter" :{return;}
-				    case "delay" :
-				    {
-				    	delaySendMsgs.put(message);
-				    	break;
-				    }
-				}
-			}
+			controller.handleSendMessage(message);
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}
