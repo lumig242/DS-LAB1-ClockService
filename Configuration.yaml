@@ -28,5 +28,5 @@ receiveRules :
   - action : dropAfter
     dest   : daphnie
     seqNum : 4
-
+# To Specify the total number of proccesses
 processSize: 4

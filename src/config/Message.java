@@ -3,12 +3,12 @@ package config;
 import java.io.Serializable;
 
 public class Message implements Serializable{
-	/**
-	 * 
-	 */
 	private static final long serialVersionUID = 1L;
 	private Header header;// there is no source in header
 	private Object payload;
+	/**
+	 * Added field in lab1. Together with the setter/getter
+	 */
 	private Timestamp timestamp;
 	
 	

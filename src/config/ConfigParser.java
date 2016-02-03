@@ -48,16 +48,12 @@ public class ConfigParser {
 		parseRules((List<Map<String, Object>>)values.get("sendRules"), sendRules);
 		parseRules((List<Map<String, Object>>)values.get("receiveRules"), receiveRules);
 		processSize = (int) values.get("processSize");
-		System.out.println(servers);
-		System.out.println(sendRules);
-		System.out.println(receiveRules);
-		System.out.println(processSize);
+		//System.out.println(servers);
+		//System.out.println(sendRules);
+		//System.out.println(receiveRules);
+		//System.out.println(processSize);
 	}
 	
-	/**
-	 * To be finished
-	 * Reconfiguration schema needed
-	 */
 	public void reconfiguration(){
 		Yaml yaml = new Yaml();
 		InputStream input;

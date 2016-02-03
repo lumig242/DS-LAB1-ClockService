@@ -25,7 +25,6 @@ public class ListenerThread implements Runnable {
     	try{
             while(true){  
             	Message msg = (Message) server.getInput().readObject();
-            	System.out.println("receive " + msg);
             	controller.handleReceiveMessgae(msg);
             }    
         }catch(Exception e){  

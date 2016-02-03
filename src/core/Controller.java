@@ -3,10 +3,15 @@ package core;
 import java.util.concurrent.LinkedBlockingQueue;
 
 import clockService.Clock;
+import clockService.LogicClock;
 import config.ConfigParser;
 import config.Message;
 import config.Rule;
 
+/**
+ * Controller to handle send/receive messages
+ *
+ */
 public final class Controller {
 	private ConfigParser config;
 	private LinkedBlockingQueue<Message> receiveMsgs;
@@ -36,7 +41,7 @@ public final class Controller {
 		System.out.println("Handle " + msg);
 		// Update the system clock
 		clock.setTimeReceive(msg.getTimestamp());
-		
+		//((LogicClock)clock).debugPrintClock();
 		Rule rule = config.matchReceiveRule(msg.getSource(), msg.getDest(), msg.getKind(), msg.get_seqNum());
 		if(rule == null) {
 			// Put the first message in the queue

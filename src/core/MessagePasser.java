@@ -37,6 +37,7 @@ public class MessagePasser {
 	public MessagePasser(String configuration_filename, String local_name, String clockType){
 		// Parse the Yaml configuration file
 		config = new ConfigParser(configuration_filename);
+		// Add in lab 1
 		// Start the clock service due to clockType specified
 		if(clockType.equals("logic")){
 			clock = ClockFactory.getClockInstance(clockType);
@@ -44,6 +45,8 @@ public class MessagePasser {
 			clock = ClockFactory.getClockInstance(clockType, config.getProcessSize(), config.getIndex(local_name));
 		}
 		localServer = config.getServer(local_name);
+		// Refined in lab1
+		// Add a controller to remove duplicate code
 		controller = new Controller(config, receiveMsgs, delayReceiveMsgs, sendMsgs, delaySendMsgs, clock);
 		
 		// Start the thread to keep listening on port

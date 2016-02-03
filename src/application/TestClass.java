@@ -5,7 +5,7 @@ import core.MessagePasser;
 
 public class TestClass {
 	public static void main(String[] args){
-		final MessagePasser mp1 = new MessagePasser("Configuration.yaml", "alice", "vector");
+		final MessagePasser mp1 = new MessagePasser("Configuration.yaml", "alice", "logic");
 		Thread recieve1 = new Thread() {
             public void run() {
             	while(true){
@@ -22,7 +22,7 @@ public class TestClass {
             	}
             }
         };
-        //recieve1.start();
+        recieve1.start();
         
 		Thread send1 = new Thread() {
             public void run() {
@@ -42,7 +42,7 @@ public class TestClass {
         
         
         
-        final MessagePasser mp2 = new MessagePasser("Configuration.yaml", "bob", "vector");
+        final MessagePasser mp2 = new MessagePasser("Configuration.yaml", "bob", "logic");
 		Thread recieve2 = new Thread() {
             public void run() {
             	while(true){
@@ -75,7 +75,7 @@ public class TestClass {
             	}
             }
         };
-        //send2.start();
+        send2.start();
         
         
 	}
