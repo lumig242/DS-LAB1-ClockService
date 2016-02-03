@@ -3,7 +3,7 @@ package clockService;
 import config.Timestamp;
 
 public class LogicClock implements Clock {
-	private static Integer counter;
+	private Integer counter;
 	
 	public LogicClock() {
 		counter = 0;
@@ -19,6 +19,5 @@ public class LogicClock implements Clock {
 		int maxTime = Math.max(timeStamp.getLogicTime(), counter);
 		counter = maxTime + 1;
 	}
-
 
 }

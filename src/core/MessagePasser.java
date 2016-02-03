@@ -19,8 +19,8 @@ import config.Server;
  */
 public class MessagePasser {
 	private Server localServer;
-	public static Controller controller;
-	public static Clock clock;
+	public Controller controller;
+	public Clock clock;
 	private LinkedBlockingQueue<Message> sendMsgs = new LinkedBlockingQueue<Message>();
 	private LinkedBlockingQueue<Message> delaySendMsgs = new LinkedBlockingQueue<Message>();
 	private LinkedBlockingQueue<Message> receiveMsgs = new LinkedBlockingQueue<Message>();
@@ -37,14 +37,15 @@ public class MessagePasser {
 	public MessagePasser(String configuration_filename, String local_name, String clockType){
 		// Parse the Yaml configuration file
 		config = new ConfigParser(configuration_filename);
+		// Start the clock service due to clockType specified
 		if(clockType.equals("logic")){
 			clock = ClockFactory.getClockInstance(clockType);
 		}else{
-			// TODO parse vector clock process size& current process ID in the config class
 			clock = ClockFactory.getClockInstance(clockType, config.getProcessSize(), config.getIndex(local_name));
 		}
 		localServer = config.getServer(local_name);
-		controller = new Controller(config, receiveMsgs, delayReceiveMsgs, sendMsgs, delaySendMsgs);
+		controller = new Controller(config, receiveMsgs, delayReceiveMsgs, sendMsgs, delaySendMsgs, clock);
+		
 		// Start the thread to keep listening on port
 		// Start separate thread for all the clients connected
 		Thread t = new Thread(new Runnable() {
@@ -81,7 +82,7 @@ public class MessagePasser {
 		                	server.setOutput(output);
 							server.setInput(input);
 							// Start a new thread to listen from the node
-							new Thread(new ListenerThread(server)).start();
+							new Thread(new ListenerThread(server, controller)).start();
 						}
 					}
 				} catch (IOException | ClassNotFoundException | InterruptedException e) {
@@ -121,7 +122,7 @@ public class MessagePasser {
 				ObjectOutputStream outputStream = new ObjectOutputStream(socket.getOutputStream());
 				destServer.setInput(inputStream);
 				destServer.setOutput(outputStream);
-				new Thread(new ListenerThread(destServer)).start();
+				new Thread(new ListenerThread(destServer, controller)).start();
 			} catch (IOException e) {
 				e.printStackTrace();
 			}

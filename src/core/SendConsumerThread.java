@@ -40,6 +40,7 @@ public class SendConsumerThread implements Runnable {
 			ObjectOutputStream outputStream = destServer.getOutput();
 			try {
 				//send
+				System.out.println("send hehehe        " + msg);
 				outputStream.writeObject(msg);
 				outputStream.flush();
 			} catch (IOException e) {

@@ -2,6 +2,7 @@ package core;
 
 import java.util.concurrent.LinkedBlockingQueue;
 
+import clockService.Clock;
 import config.ConfigParser;
 import config.Message;
 import config.Rule;
@@ -12,18 +13,19 @@ public final class Controller {
 	private LinkedBlockingQueue<Message> delayReceiveMsgs;
 	private LinkedBlockingQueue<Message> sendMsgs;
 	private LinkedBlockingQueue<Message> delaySendMsgs;
-
+	private Clock clock;
 	
 	public Controller(ConfigParser config, LinkedBlockingQueue<Message> receiveMsgs, 
 						LinkedBlockingQueue<Message> delayReceiveMsgs,
 						LinkedBlockingQueue<Message> sendMsgs,
-						LinkedBlockingQueue<Message> delaySendMsgs){
+						LinkedBlockingQueue<Message> delaySendMsgs,
+						Clock clock){
 		this.config = config;
 		this.receiveMsgs = receiveMsgs;
 		this.delayReceiveMsgs = delayReceiveMsgs;
 		this.sendMsgs = sendMsgs;
 		this.delaySendMsgs = delaySendMsgs;
-		
+		this.clock = clock;
 	}
 	
 	public void handleReceiveMessgae(Message msg) throws InterruptedException{
@@ -31,8 +33,9 @@ public final class Controller {
 			config.reconfiguration();
 		}
 		
+		System.out.println("Handle " + msg);
 		// Update the system clock
-		MessagePasser.clock.setTimeReceive(msg.getTimestamp());
+		clock.setTimeReceive(msg.getTimestamp());
 		
 		Rule rule = config.matchReceiveRule(msg.getSource(), msg.getDest(), msg.getKind(), msg.get_seqNum());
 		if(rule == null) {
@@ -61,7 +64,8 @@ public final class Controller {
 		}
 		
 		// Attach timestamp
-		message.setTimestamp(MessagePasser.clock.getTimestampSend());
+		message.setTimestamp(clock.getTimestampSend());
+		//System.out.println("Attached " + message.getTimestamp());
 
 		Rule rule = config.matchSendRule(message.getSource(), message.getDest(), message.getKind(), message.get_seqNum());
 		//System.out.println("Rule:" + rule);

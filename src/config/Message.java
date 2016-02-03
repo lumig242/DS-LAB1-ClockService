@@ -7,7 +7,7 @@ public class Message implements Serializable{
 	 * 
 	 */
 	private static final long serialVersionUID = 1L;
-	private Header header;// there is no source in header 												???
+	private Header header;// there is no source in header
 	private Object payload;
 	private Timestamp timestamp;
 	
@@ -17,7 +17,8 @@ public class Message implements Serializable{
 		return "Message " +  header.getSeq() +
 			   " dest@" + header.getDest() + 
 			   " source@" + header.getSource() +
-			   " kind@" + this.getKind() + 
+			   " kind@" + this.getKind() +
+			   " " + this.getTimestamp() +
 			   " data@" + payload;
 	};
 	
