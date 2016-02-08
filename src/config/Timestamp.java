@@ -60,9 +60,11 @@ public class Timestamp implements Serializable{
 	 * @return enum comp, four types in all
 	 * @throws Exception 
 	 */
-	public comp compareTo(Timestamp o) throws Exception {
+	public comp compareTo(Timestamp o){
 		if (type.equals("logic")){
-			throw new Exception("Can not compare logic timestamp");
+			if(intCounter < o.intCounter)	return comp.LESS;
+			if(intCounter > o.intCounter)	return comp.GREATER;
+			return comp.EQUAL;
 		}
 		// TODO implement the compare for vector timestamp
 		Boolean equal = true, lessThanAndEqual = true, greaterThanAndEqual = true;
