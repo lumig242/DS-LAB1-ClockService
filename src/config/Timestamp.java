@@ -9,10 +9,18 @@ import java.util.Arrays;
  *       Both types of clock service are stored in a timestamp. Only clock service
  *       instance take care to manage this.
  */
-public class Timestamp implements Comparable<Timestamp>, Serializable{
+public class Timestamp implements Serializable{
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
 	private Integer[] vecCounter;
 	private Integer intCounter;
 	private String type;
+	
+	public enum comp{
+		LESS, GREATER, PARALLEL, EQUAL
+	}
 	
 	public Timestamp(Integer counter) {
 		intCounter = counter;
@@ -46,28 +54,38 @@ public class Timestamp implements Comparable<Timestamp>, Serializable{
 		return "";
 	}
 	
-	@Override
-	public int compareTo(Timestamp o) {
-		/*
-		 *  It's not good to override as a comparable here.
-		 *  Compare between timestamps doesn't follow the rule.
-		 * 
-		if (type.equals("logic")){
-			return this.getLogicTime().compareTo(o.getLogicTime());
-		}else{
-			// TODO implement the compare for vector timestamp
-			// return this.getVectorTime().compareTo(o.getVectorTime());
-			return 0;
-		}
-		*/
-		return 0;
-	}
-	
 	/**
-	 * TODO: implement some kind of compare function. Not decided yet.
+	 * compare two timestamps
+	 * @param o
+	 * @return enum comp, four types in all
+	 * @throws Exception 
 	 */
-	public static int compare(Timestamp o1, Timestamp o2){
-		return 0;
+	public comp compareTo(Timestamp o) throws Exception {
+		if (type.equals("logic")){
+			throw new Exception("Can not compare logic timestamp");
+		}
+		// TODO implement the compare for vector timestamp
+		Boolean equal = true, lessThanAndEqual = true, greaterThanAndEqual = true;
+		for(int i = 0; i < vecCounter.length; i++){
+			if(vecCounter[i] != o.vecCounter[i]){
+				equal = false;
+			}else if(vecCounter[i] > o.vecCounter[i]){
+				lessThanAndEqual = false;
+			}else{
+				greaterThanAndEqual = false;
+			}
+		}
+		
+		if(equal.equals(true)){
+			return comp.EQUAL;
+		}
+		// Timestamps are not equal from follows
+		if(lessThanAndEqual.equals(true)){
+			return comp.LESS;
+		}
+		if(greaterThanAndEqual.equals(true)){
+			return comp.GREATER;
+		}
+		return comp.PARALLEL;
 	}
-	
 }
