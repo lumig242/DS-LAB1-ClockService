@@ -33,10 +33,11 @@ public class Logger {
 			while(index < receiveMsgs.size()){
 				// If not smaller, equal or parallel
 				// Insert
-				if(!receiveMsgs.get(index).getTimestamp().compareTo(msg.getTimestamp()).equals(Timestamp.comp.GREATER)){
+				if(!receiveMsgs.get(index).getTimestamp().compareTo(msg.getTimestamp()).equals(Timestamp.comp.LESS)){
 					receiveMsgs.add(index, msg);
 					return;
 				}
+				index ++ ;
 			}
 			receiveMsgs.add(msg);
 		}
@@ -46,8 +47,9 @@ public class Logger {
 		try{
 			FileWriter file = new FileWriter(fileName, true);
 			PrintWriter fileout = new PrintWriter(new BufferedWriter(file));
+			System.out.println(receiveMsgs);
 			for(Message msg: receiveMsgs){
-				if(!lastMsg.equals(null)){
+				if(lastMsg != null){
 					Timestamp.comp compType = msg.getTimestamp().compareTo(lastMsg.getTimestamp());
 					if(compType.equals(Timestamp.comp.PARALLEL)){
 						parallelSeq++;
@@ -59,16 +61,17 @@ public class Logger {
 				String outLogs = constructSeq(seqNum, parallelSeq) + msg;
 				fileout.println(outLogs);
 				System.out.println(outLogs);
+				lastMsg = msg;
 			}
 			file.close();
-		    
+		    receiveMsgs.clear();
 		}catch (IOException e) {
 		    //exception handling left as an exercise for the reader
 		}
 	}
 	
 	private String constructSeq(int _seqNum, int _parallelSeq){
-		if(_parallelSeq == 0) return "Seq ["  + _seqNum + " ] ";
+		if(_parallelSeq == 0) return "Seq ["  + _seqNum + "] ";
 		return "Seq ["  + _seqNum + "." + _parallelSeq + "] ";
 	}
 }

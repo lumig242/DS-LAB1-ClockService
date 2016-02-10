@@ -71,9 +71,11 @@ public class Timestamp implements Serializable{
 		for(int i = 0; i < vecCounter.length; i++){
 			if(vecCounter[i] != o.vecCounter[i]){
 				equal = false;
-			}else if(vecCounter[i] > o.vecCounter[i]){
+			}
+			if(vecCounter[i] > o.vecCounter[i]){
 				lessThanAndEqual = false;
-			}else{
+			}
+			if(vecCounter[i] < o.vecCounter[i]){
 				greaterThanAndEqual = false;
 			}
 		}

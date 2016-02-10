@@ -10,6 +10,7 @@ import java.util.Scanner;
 import org.yaml.snakeyaml.Yaml;
 
 import config.Message;
+import config.Timestamp;
 import core.MessagePasser;
 
 public class LogApp {
@@ -56,8 +57,7 @@ public class LogApp {
             	}	
             }
         };
-        t.start();
-        
+        t.start();       
         while(true){
         	Scanner sc = new Scanner(System.in);
         	if(sc.nextLine().length() < 2)	continue;
