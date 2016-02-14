@@ -34,11 +34,15 @@ public class MulticastController {
 		
 		// Start the B-multicast
 		for(String destServerName:group.getGroupMember()){
+			Message sendMsg = new Message(msg);
 			if(!destServerName.equals(config.getLocal_name())){
 				// Construct a new message and send it
-				Message sendMsg = new Message(msg);
 				sendMsg.setDest(destServerName);
 				controller.handleSendMessage(sendMsg);
+			}else{
+				// If send the message to self
+				// Simulate this behavior by directly receiving it 
+				controller.handleReceiveMessgae(sendMsg);
 			}
 		}
 		//controller.handleSendMessage(msg);
