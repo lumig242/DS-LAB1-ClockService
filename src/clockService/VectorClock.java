@@ -18,8 +18,7 @@ public class VectorClock implements Clock {
 
 	@Override
 	public Timestamp getTimestampSend() {
-		System.out.println(Arrays.toString(counter) + "   getsend");
-		counter[currentID] = counter[currentID] + 1;
+		increment();
 		return new Timestamp(counter.clone());
 	}
 
@@ -31,4 +30,7 @@ public class VectorClock implements Clock {
 		}
 	}
 
+	public void increment() {
+		counter[currentID] = counter[currentID] + 1;
+	}
 }

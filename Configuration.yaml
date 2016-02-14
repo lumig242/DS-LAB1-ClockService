@@ -36,6 +36,21 @@ receiveRules :
     src    : a
     kind   : dropAfter  
     seqNum : 8
-  
+groups :
+  - name : Group1
+    members :
+      - alice
+      - bob
+      - charlie
+  - name : Group2
+    members :
+      - daphnie
+      - bob
+      - charlie
+# A single, top-level section in the YAML file
+# Group names must be unique
+# Any number of members in the group
+# As many groups as you’d like 
+ 
 # To Specify the total number of proccesses
 processSize: 4

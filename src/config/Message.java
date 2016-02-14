@@ -27,6 +27,16 @@ public class Message implements Serializable{
 		this.payload = payload;
 	}
 	
+	/**
+	 * Copy Constructor
+	 * @param msg
+	 */
+	public Message(Message msg){
+		this.header = new Header(msg.header);
+		this.timestamp = new Timestamp(msg.timestamp);
+		this.payload = msg.payload;
+		
+	}
 	
 	
 	public Object getPayload() {
@@ -41,6 +51,10 @@ public class Message implements Serializable{
 		return this.header.getDest();
 	}
 
+	public void setDest(String dest) {
+		this.header.setDest(dest);
+	}
+	
 	public void set_source(String source){
 		this.header.setSource(source);;
 	};
@@ -55,6 +69,10 @@ public class Message implements Serializable{
 
 	public String getKind() {
 		return this.header.getKind();
+	}
+	
+	public void setKind(String kind){
+		this.header.setKind(kind);
 	}
 	
 	public boolean isDuplicate() {
@@ -85,6 +103,19 @@ public class Message implements Serializable{
 			this.setDest(dest);
 			this.setKind(kind);
 			this.setSeq(seq);
+		}
+		
+		/**
+		 * Copy Constructor
+		 * @param header
+		 */
+		public Header(Header header) {
+			this.dest = header.dest;
+			this.source = header.source;
+			this.kind = header.kind;
+			this.seq = header.seq;
+			this.duplicate = header.duplicate;
+			
 		}
 
 		public String getDest() {

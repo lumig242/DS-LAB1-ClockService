@@ -22,14 +22,20 @@ public class ConfigParser {
 	private List<Rule> sendRules = new ArrayList<>();
 	private List<Rule> receiveRules = new ArrayList<>();
 	private List<String> serverNameList = new ArrayList<>();
-	private String filename;
+	private Map<String, Group> groups = new HashMap<>();
+	private String filename, local_name;
+	public String getLocal_name() {
+		return local_name;
+	}
+
 	private static long CONFIG_FILE_LAST_MODIFIED;
 	private File configFile;
 	private int processSize;
 	
 	@SuppressWarnings("unchecked")
-	public ConfigParser(String filename){
+	public ConfigParser(String filename, String local_name){
 		this.setFilename(filename);
+		this.local_name = local_name;
 		Yaml yaml = new Yaml();
 		InputStream input;
 		try {
@@ -47,11 +53,13 @@ public class ConfigParser {
 		parseServers((List<Map<String, Object>>)values.get("configuration"), servers);
 		parseRules((List<Map<String, Object>>)values.get("sendRules"), sendRules);
 		parseRules((List<Map<String, Object>>)values.get("receiveRules"), receiveRules);
+		parseGroups((List<Map<String, Object>>)values.get("groups"), groups);
 		processSize = (int) values.get("processSize");
 		//System.out.println(servers);
 		//System.out.println(sendRules);
 		//System.out.println(receiveRules);
 		//System.out.println(processSize);
+		System.out.println(groups);
 	}
 	
 	public void reconfiguration(){
@@ -84,7 +92,11 @@ public class ConfigParser {
 		return servers.get(serverName);
 	}
 	
-	public int getIndex(String serverName){
+	public Group getGroup(String groupName){
+		return groups.get(groupName);
+	}
+	
+	public int getIndexOfServer(String serverName){
 		return serverNameList.indexOf(serverName);
 	}
 	
@@ -148,6 +160,15 @@ public class ConfigParser {
 				rule.setSeqNum((Integer) item.get("seqNum"));
 			}
 			rules.add(rule);
+		}
+	}
+	
+	private void parseGroups(List<Map<String, Object>> agroups, Map<String, Group> groups){
+		for(Map<String, Object> item: agroups){
+			String groupName = (String) item.get("name");
+			ArrayList<String> groupMember = (ArrayList<String>) item.get("members");
+			Group group = new Group(groupName, groupMember, local_name);
+			groups.put(groupName, group);
 		}
 	}
 

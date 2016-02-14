@@ -1,5 +1,8 @@
 # ClockService
-This is the lab1 for cmu18842 distributed system.
+This is all the labs for cmu18842 distributed system.
 
-We developed facilities to track events using Logical and Vector Clocks, and also built a logging application.
+In lab 0, we built a message passer on top of tcp connections. 
+
+In lab1, we developed facilities to track events using Logical and Vector Clocks, together with a logging application.
  
+In lab2, we implemented the casual ordered multicast schema. 

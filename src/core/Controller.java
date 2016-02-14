@@ -1,5 +1,9 @@
 package core;
 
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.net.Socket;
 import java.util.concurrent.LinkedBlockingQueue;
 
 import clockService.Clock;
@@ -7,6 +11,7 @@ import clockService.LogicClock;
 import config.ConfigParser;
 import config.Message;
 import config.Rule;
+import config.Server;
 
 /**
  * Controller to handle send/receive messages
@@ -18,6 +23,7 @@ public final class Controller {
 	private LinkedBlockingQueue<Message> delayReceiveMsgs;
 	private LinkedBlockingQueue<Message> sendMsgs;
 	private LinkedBlockingQueue<Message> delaySendMsgs;
+	private MulticastController multicstController;
 	private Clock clock;
 	
 	public Controller(ConfigParser config, LinkedBlockingQueue<Message> receiveMsgs, 
@@ -33,24 +39,28 @@ public final class Controller {
 		this.clock = clock;
 	}
 	
+	public void setMulticastController(MulticastController multicastController){
+		this.multicstController = multicastController;
+	}
+	
 	public void handleReceiveMessgae(Message msg) throws InterruptedException{
 		if(!config.isUpToDate()) {
 			config.reconfiguration();
 		}
 		
-		System.out.println("Handle " + msg);
-		// Update the system clock
-		clock.setTimeReceive(msg.getTimestamp());
+		//System.out.println("Handle " + msg);
 		//((LogicClock)clock).debugPrintClock();
 		Rule rule = config.matchReceiveRule(msg.getSource(), msg.getDest(), msg.getKind(), msg.get_seqNum());
 		if(rule == null) {
 			// Put the first message in the queue
 	        //System.out.println(msg + "receive");
-	        receiveMsgs.put(msg);
+	        //receiveMsgs.put(msg);
+			deliverReceiveMessage(msg);
 	        //System.out.println(receiveMsgs);
 	        
 	        while(!delayReceiveMsgs.isEmpty()) {
-	        	receiveMsgs.put(delayReceiveMsgs.poll());
+	        	//receiveMsgs.put(delayReceiveMsgs.poll());
+	        	deliverReceiveMessage(delayReceiveMsgs.poll());
 	        }
 		} else {
 			switch(rule.getAction().toLowerCase()) {
@@ -63,15 +73,55 @@ public final class Controller {
 		}
 	}
 	
+	/**
+	 * Deliver a receive message (after rule matching).
+	 * If point to point cast, put into the final deliver queue
+	 * If multicast, call the group handler to deal with it
+	 * @param message
+	 * @throws InterruptedException
+	 */
+	public void deliverReceiveMessage(Message message) throws InterruptedException{
+		if(!message.getKind().equals("multicast")){
+			// Update the system clock
+			clock.setTimeReceive(message.getTimestamp());
+			receiveMsgs.put(message);
+		}else{
+			multicstController.handleReceiveMessage(message);
+		}
+	}
+	
+	/**
+	 * Handle all the send request
+	 * Only send the message to the dest server
+	 * @param message
+	 * @throws InterruptedException
+	 */
 	public void handleSendMessage(Message message) throws InterruptedException{
 		if(!config.isUpToDate()) {
 			config.reconfiguration();
 		}
 		
-		// Attach timestamp
-		message.setTimestamp(clock.getTimestampSend());
-		//System.out.println("Attached " + message.getTimestamp());
 
+		Server destServer = config.getServer(message.getDest());
+		
+		// if this is the first msg sent
+		// act as the client
+		// create a new TCP connection
+		if(destServer.getOutput() == null){
+			try {
+				System.out.println("Connect to Destserver: " + destServer);
+				@SuppressWarnings("resource")
+				Socket socket = new Socket(destServer.getIp(), destServer.getPort());
+				ObjectInputStream inputStream = new ObjectInputStream(socket.getInputStream());
+				ObjectOutputStream outputStream = new ObjectOutputStream(socket.getOutputStream());
+				destServer.setInput(inputStream);
+				destServer.setOutput(outputStream);
+				new Thread(new ListenerThread(destServer, this)).start();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+		
 		Rule rule = config.matchSendRule(message.getSource(), message.getDest(), message.getKind(), message.get_seqNum());
 		//System.out.println("Rule:" + rule);
 		if(rule == null) {
@@ -92,4 +142,5 @@ public final class Controller {
 			}
 		}
 	}
+
 }

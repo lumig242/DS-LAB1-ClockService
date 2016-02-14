@@ -21,6 +21,7 @@ public class MessagePasser {
 	private Server localServer;
 	public Controller controller;
 	public Clock clock;
+	public MulticastController multicastController;
 	private LinkedBlockingQueue<Message> sendMsgs = new LinkedBlockingQueue<Message>();
 	private LinkedBlockingQueue<Message> delaySendMsgs = new LinkedBlockingQueue<Message>();
 	private LinkedBlockingQueue<Message> receiveMsgs = new LinkedBlockingQueue<Message>();
@@ -30,25 +31,26 @@ public class MessagePasser {
 	private int sequenceNumber = 0;
 	
 	public MessagePasser(String configuration_filename, String local_name){
-		//Use logical clock as default
-		this(configuration_filename, local_name, "logic");
+		//Use vector clock as default
+		this(configuration_filename, local_name, "vector");
 	}
 	
 	public MessagePasser(String configuration_filename, String local_name, String clockType){
 		// Parse the Yaml configuration file
-		config = new ConfigParser(configuration_filename);
+		config = new ConfigParser(configuration_filename, local_name);
 		// Add in lab 1
 		// Start the clock service due to clockType specified
 		if(clockType.equals("logic")){
 			clock = ClockFactory.getClockInstance(clockType);
 		}else{
-			clock = ClockFactory.getClockInstance(clockType, config.getProcessSize(), config.getIndex(local_name));
+			clock = ClockFactory.getClockInstance(clockType, config.getProcessSize(), config.getIndexOfServer(local_name));
 		}
 		localServer = config.getServer(local_name);
 		// Refined in lab1
 		// Add a controller to remove duplicate code
 		controller = new Controller(config, receiveMsgs, delayReceiveMsgs, sendMsgs, delaySendMsgs, clock);
-		
+		multicastController = new MulticastController(config, receiveMsgs, controller);
+		controller.setMulticastController(multicastController);
 		// Start the thread to keep listening on port
 		// Start separate thread for all the clients connected
 		Thread t = new Thread(new Runnable() {
@@ -108,34 +110,36 @@ public class MessagePasser {
 	 */
 	public void send(Message message){
 		
+		// Attach timestamp
+		message.setTimestamp(clock.getTimestampSend());
+		//System.out.println("Attached " + message.getTimestamp());
+		message.set_seqNum(sequenceNumber++);
 		message.set_source(localServer.getName());
-		//System.out.println("Sent: " + message);
-		Server destServer = config.getServer(message.getDest());
-		//System.out.println("Destserver: " + destServer);
 		
-		// if this is the first msg sent
-		// act as the client
-		// create a new TCP connection
-		if(destServer.getOutput() == null){
-			try {
-				System.out.println("Connect to Destserver: " + destServer);
-				@SuppressWarnings("resource")
-				Socket socket = new Socket(destServer.getIp(), destServer.getPort());
-				ObjectInputStream inputStream = new ObjectInputStream(socket.getInputStream());
-				ObjectOutputStream outputStream = new ObjectOutputStream(socket.getOutputStream());
-				destServer.setInput(inputStream);
-				destServer.setOutput(outputStream);
-				new Thread(new ListenerThread(destServer, controller)).start();
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-		}
-		
-		// Put the msg into queue
+		// 
 		try {
-			message.set_seqNum(sequenceNumber++);
+
 			controller.handleSendMessage(message);
 		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	/**
+	 * Multicast a message.
+	 * Update the sequence number only once here.
+	 * No updaing the unicast clock.
+	 * Handled by the multicast controller
+	 * @param message
+	 */
+	public void multicast(Message message){
+		message.set_seqNum(sequenceNumber++);
+		message.set_source(localServer.getName());
+		message.setKind("multicast");
+		try {
+			multicastController.multicast(message);
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}

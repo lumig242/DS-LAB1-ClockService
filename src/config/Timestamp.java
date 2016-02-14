@@ -31,6 +31,16 @@ public class Timestamp implements Serializable{
 		vecCounter = counter;
 		type = "vector";
 	}
+	
+	/**
+	 * Copy Constructor
+	 * @param timestamp
+	 */
+	public Timestamp(Timestamp timestamp) {
+		this.vecCounter = timestamp.vecCounter.clone();
+		this.intCounter = timestamp.intCounter;
+		this.type = timestamp.type;
+	}
 
 	public Integer getLogicTime(){
 		return intCounter;
