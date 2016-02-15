@@ -29,8 +29,22 @@ public class VectorClock implements Clock {
 			counter[i] = Math.max(counter[i], timeStamp.getVectorTime()[i]);
 		}
 	}
-
+	
+	@Override
 	public void increment() {
 		counter[currentID] = counter[currentID] + 1;
 	}
+	
+	/**
+	 * Increment the numebr at position j
+	 * @param j
+	 */
+	public void incrementAt(int j){
+		counter[j]++;
+	}
+	
+	public Integer[] getTimeStamp(){
+		return counter.clone();
+	}
+	
 }

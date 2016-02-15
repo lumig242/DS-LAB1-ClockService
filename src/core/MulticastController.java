@@ -56,24 +56,27 @@ public class MulticastController {
 	public void handleReceiveMessage(Message msg){
 		Group group = config.getGroup(msg.getDest());
 		VectorClock clock = group.getClock();
-		LinkedBlockingQueue<Message> holdBackQueue = group.getHoldBackMsgs();
 		
 		// TODO: implement the reliable multicast + causual ordering algorithm
 		// According to book P648 15.9 & P657 15.15
 		
 		// check if received
-		
-		// multicast(msg)
-		
-		// holdBackQueue.add(msg)
-		
-		// wait
-		
-		// if ready to deliver
-		// holdBackQueue.poll()
-		// deliverMessage(msg)
-		
-		// clock.increment()
+		if(!group.receiveBefore(msg)){
+			try {
+				// Multicast it and record in the holdback queue
+				multicast(msg);
+				group.addMessage(msg);
+				// Deliver all the possible message and
+				// Update the clock
+				while(group.readyToDeliver()){
+					Message deliverMsg = group.fetchOneMessage();
+					deliverMessage(deliverMsg);
+				}
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
 	}
 	
 	/**
