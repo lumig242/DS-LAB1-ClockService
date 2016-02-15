@@ -13,4 +13,6 @@ public interface Clock {
 	 * @param timeStamp
 	 */
 	public void setTimeReceive(Timestamp timeStamp);
+	
+	public void increment();
 }

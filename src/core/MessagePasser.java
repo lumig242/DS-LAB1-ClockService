@@ -160,5 +160,12 @@ public class MessagePasser {
 			e.printStackTrace();
 		}
 		return null;
-	};
+	}
+	
+	/**
+	 * The interface events other than message send/receive
+	 */
+	public void triggerEvent(){
+		clock.increment();
+	}
 }

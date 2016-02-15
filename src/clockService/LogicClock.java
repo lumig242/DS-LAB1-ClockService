@@ -16,7 +16,7 @@ public class LogicClock implements Clock {
 	@Override
 	public Timestamp getTimestampSend() {
 		System.out.println("COUNTER SEND" + counter);
-		counter ++;
+		increment();
 		return new Timestamp(counter);
 	}
 
@@ -26,5 +26,11 @@ public class LogicClock implements Clock {
 		int maxTime = Math.max(timeStamp.getLogicTime(), counter);
 		counter = maxTime + 1;
 	}
+
+	@Override
+	public void increment() {
+		counter++;
+	}
+
 
 }
