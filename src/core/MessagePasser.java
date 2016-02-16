@@ -8,10 +8,13 @@ import java.util.concurrent.LinkedBlockingQueue;
 
 import clockService.Clock;
 import clockService.ClockFactory;
+import clockService.VectorClock;
 import config.ConfigParser;
+import config.Group;
 import config.GroupMessage;
 import config.Message;
 import config.Server;
+import config.Timestamp;
 
 /**
  * The main class
@@ -134,10 +137,16 @@ public class MessagePasser {
 	 * @param message
 	 */
 	public void multicast(GroupMessage message){
-		message.set_seqNum(sequenceNumber++);
-		message.set_source(localServer.getName());
+		GroupMessage gmsg = (GroupMessage) message;
+		Group group = config.getGroup(gmsg.getGroupName());
+		VectorClock clock = group.getClock();
+		Timestamp timestamp = clock.getTimestampSend();
+		
+		gmsg.setTimestamp(timestamp);
+		gmsg.setOriginSource(localServer.getName());
+		gmsg.set_seqNum(sequenceNumber++);
 		try {
-			multicastController.multicast(message);
+			multicastController.multicast(gmsg);
 		} catch (InterruptedException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

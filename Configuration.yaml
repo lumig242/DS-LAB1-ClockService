@@ -22,13 +22,13 @@ configuration :
 # May be changed for further communication as usual
 sendRules :
   - action : delay
-    src    : alice
+    src    : a
     kind   : delay
   - action : drop
-    src    : alice
+    src    : a
     kind   : drop
   - action : dropAfter
-    src    : alice
+    src    : a
     kind   : dropAfter  
     seqNum : 8
 receiveRules :

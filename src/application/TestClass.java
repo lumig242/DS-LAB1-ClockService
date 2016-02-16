@@ -2,6 +2,7 @@ package application;
 
 import config.GroupMessage;
 import config.Message;
+import config.Timestamp;
 import core.MessagePasser;
 
 import java.io.File;
@@ -45,17 +46,27 @@ public class TestClass {
 		final MessagePasser mp = new MessagePasser("Configuration.yaml", localName, clockType);
         try {
         	System.out.println("Waiting for all the nodes to be set!");
-			Thread.sleep(5000);
+			Thread.sleep(5);
 		} catch (InterruptedException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
         
+//        GroupMessage msg = new GroupMessage("dest", "kind", "data");
+//        msg.set_source("alice");
+//        Integer[] a = {1,1,1,1,2};
+//        msg.setTimestamp( new Timestamp(a));
+//        System.out.println(msg);
+//        GroupMessage copyMsg = new GroupMessage(msg);
+//        System.out.println(copyMsg);
+        
+        
         // Sender thread
 		Thread send1 = new Thread() {
             public void run() {
             	while(true){
-	            	Scanner sc = new Scanner(System.in);
+	            	try{
+            		Scanner sc = new Scanner(System.in);
 	            	// TYPE, MSG DEST, MSG TYPE, MSG DATA
 	            	// 1 as receive, other all send
 	            	String[] line = sc.nextLine().split(" ");
@@ -92,10 +103,13 @@ public class TestClass {
 			            		buffer.append(line[i]);
 			            	}
 			            	GroupMessage msg = new GroupMessage(line[1], line[2], buffer.toString());
-			            	mp.send(msg);
+			            	mp.multicast(msg);
 			            	System.out.println("Multicast Message: " + msg);
 			            	break;
 		            	}
+	            	}
+	            	}catch(Exception e){
+	            		e.printStackTrace();
 	            	}
             	}
             }

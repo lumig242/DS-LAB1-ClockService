@@ -17,6 +17,7 @@ public class VectorClock implements Clock {
 		this.currentID = currentID;
 	}
 
+	
 	@Override
 	public Timestamp getTimestampSend() {
 		increment();
@@ -48,6 +49,10 @@ public class VectorClock implements Clock {
 		return counter.clone();
 	}
 
+	@Override public String toString() {
+		return Arrays.toString(counter);
+	};
+	
 	@Override
 	public void printTimestamp() {
 		System.out.println(Arrays.toString(counter));

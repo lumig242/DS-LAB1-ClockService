@@ -49,7 +49,7 @@ public final class Controller {
 			config.reconfiguration();
 		}
 		
-		//System.out.println("Handle " + msg);
+		System.out.println("-----Receive " + msg);
 		//((LogicClock)clock).debugPrintClock();
 		Rule rule = config.matchReceiveRule(msg.getSource(), msg.getDest(), msg.getKind(), msg.get_seqNum());
 		if(rule == null) {
@@ -103,7 +103,7 @@ public final class Controller {
 			config.reconfiguration();
 		}
 		
-
+		System.out.println("-----Send " + message);
 		Server destServer = config.getServer(message.getDest());
 		
 		// if this is the first msg sent

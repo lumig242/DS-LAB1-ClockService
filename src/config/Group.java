@@ -81,7 +81,7 @@ public class Group {
 		
 		// According to P657 Fig 15.15
 		// j 
-		int srcIndex = groupMember.indexOf(deliverMsg.getSource());
+		int srcIndex = groupMember.indexOf(((GroupMessage)deliverMsg).getOriginSource());
 		// wait until Vj[j] = vi[j] + 1 && Vj[k] <= Vi[k]
 		for(int i = 0; i < groupMember.size(); i++){
 			if(i == srcIndex){
@@ -123,6 +123,7 @@ public class Group {
 	public String toString(){
 		return "GroupName@" + groupName + 
 				" Members@" + groupMember + 
+				" Clock@"  + groupClock + 
 				" Holdback Queue@" + holdBackMsgs;
 	}
 	

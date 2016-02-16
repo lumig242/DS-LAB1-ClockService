@@ -38,6 +38,16 @@ public class Message implements Serializable{
 		
 	}
 	
+	@Override public boolean equals(Object o) {
+		if(!(o instanceof Message)){
+			return false;
+		}
+		Message m = (Message) o;
+		return (getDest().equals(m.getDest())) &&
+				getKind().equals(m.getKind()) &&
+				(get_seqNum() == m.get_seqNum()) &&
+				getSource().equals(m.getSource());
+	};
 	
 	public Object getPayload() {
 		return this.payload;

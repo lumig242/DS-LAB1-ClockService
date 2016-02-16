@@ -31,9 +31,11 @@ public class MulticastController {
 		GroupMessage gmsg = (GroupMessage) msg;
 		Group group = config.getGroup(gmsg.getGroupName());
 		VectorClock clock = group.getClock();
+		gmsg.set_source(config.getLocal_name());
 		// Increment the timestamp only once
-		Timestamp timestamp = clock.getTimestampSend();
 		
+		System.out.println("====Multicast: " + gmsg);
+		System.out.println("====Multicast: " + group);
 		// Start the B-multicast
 		for(String destServerName:group.getGroupMember()){
 			if(!destServerName.equals(config.getLocal_name())){
@@ -44,11 +46,14 @@ public class MulticastController {
 			}else{
 				// If send the message to self
 				// Simulate this behavior by directly receiving it
-				GroupMessage sendMsg = new GroupMessage(gmsg);
-				controller.handleReceiveMessgae(sendMsg);
+				// If I'm in this group
+				if(group.getGroupMember().contains(config.getLocal_name())){
+					GroupMessage sendMsg = new GroupMessage(gmsg);				
+					sendMsg.setDest(config.getLocal_name());
+					controller.handleReceiveMessgae(sendMsg);
+				}
 			}
 		}
-		//controller.handleSendMessage(msg);
 	}
 	
 	/**
@@ -56,18 +61,25 @@ public class MulticastController {
 	 * @param msg
 	 */
 	public void handleMulticastReceiveMessage(Message msg){
-		Group group = config.getGroup(msg.getDest());
+		GroupMessage gmsg = (GroupMessage) msg;
+		Group group = config.getGroup(gmsg.getGroupName());
 		VectorClock clock = group.getClock();
 		
 		// TODO: implement the reliable multicast + causual ordering algorithm
 		// According to book P648 15.9 & P657 15.15
 		
+		System.out.println("====Receive Multicast: " + gmsg);
+		System.out.println("====Receive Multicast: " + group);
+		
 		// check if received
-		if(!group.receiveBefore(msg)){
+		if(!group.receiveBefore(gmsg)){
 			try {
 				// Multicast it and record in the holdback queue
-				multicast(msg);
-				group.addMessage(msg);
+				if(!config.getLocal_name().equals(gmsg.getSource())){
+					multicast(new GroupMessage(gmsg));
+				}
+				group.addMessage(gmsg);
+				System.out.println("========addMsg" + group);
 				// Deliver all the possible message and
 				// Update the clock
 				while(group.readyToDeliver()){
