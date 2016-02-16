@@ -9,6 +9,7 @@ import java.util.concurrent.LinkedBlockingQueue;
 import clockService.Clock;
 import clockService.LogicClock;
 import config.ConfigParser;
+import config.GroupMessage;
 import config.Message;
 import config.Rule;
 import config.Server;
@@ -58,10 +59,11 @@ public final class Controller {
 			deliverReceiveMessage(msg);
 	        //System.out.println(receiveMsgs);
 	        
-	        while(!delayReceiveMsgs.isEmpty()) {
+			while(!delayReceiveMsgs.isEmpty()) {
 	        	//receiveMsgs.put(delayReceiveMsgs.poll());
-	        	deliverReceiveMessage(delayReceiveMsgs.poll());
+				deliverReceiveMessage(delayReceiveMsgs.poll());
 	        }
+			
 		} else {
 			switch(rule.getAction().toLowerCase()) {
 				case "drop" : {break;}
@@ -80,13 +82,13 @@ public final class Controller {
 	 * @param message
 	 * @throws InterruptedException
 	 */
-	public void deliverReceiveMessage(Message message) throws InterruptedException{
-		if(!message.getKind().equals("multicast")){
+	public void deliverReceiveMessage(Message msg) throws InterruptedException{
+		if(!(msg instanceof GroupMessage)) {
 			// Update the system clock
-			clock.setTimeReceive(message.getTimestamp());
-			receiveMsgs.put(message);
+			clock.setTimeReceive(msg.getTimestamp());
+			receiveMsgs.put(msg);
 		}else{
-			multicstController.handleReceiveMessage(message);
+			multicstController.handleMulticastReceiveMessage(msg);
 		}
 	}
 	

@@ -5,6 +5,7 @@ import java.util.concurrent.LinkedBlockingQueue;
 import clockService.VectorClock;
 import config.ConfigParser;
 import config.Group;
+import config.GroupMessage;
 import config.Message;
 import config.Timestamp;
 
@@ -27,7 +28,8 @@ public class MulticastController {
 	 * @throws InterruptedException
 	 */
 	public void multicast(Message msg) throws InterruptedException{
-		Group group = config.getGroup(msg.getDest());
+		GroupMessage gmsg = (GroupMessage) msg;
+		Group group = config.getGroup(gmsg.getGroupName());
 		VectorClock clock = group.getClock();
 		// Increment the timestamp only once
 		Timestamp timestamp = clock.getTimestampSend();
@@ -36,13 +38,13 @@ public class MulticastController {
 		for(String destServerName:group.getGroupMember()){
 			if(!destServerName.equals(config.getLocal_name())){
 				// Construct a new message and send it
-				Message sendMsg = new Message(msg);
+				GroupMessage sendMsg = new GroupMessage(gmsg);
 				sendMsg.setDest(destServerName);
 				controller.handleSendMessage(sendMsg);
 			}else{
 				// If send the message to self
 				// Simulate this behavior by directly receiving it
-				Message sendMsg = new Message(msg);
+				GroupMessage sendMsg = new GroupMessage(gmsg);
 				controller.handleReceiveMessgae(sendMsg);
 			}
 		}
@@ -53,7 +55,7 @@ public class MulticastController {
 	 * Handle all the received multicast message 
 	 * @param msg
 	 */
-	public void handleReceiveMessage(Message msg){
+	public void handleMulticastReceiveMessage(Message msg){
 		Group group = config.getGroup(msg.getDest());
 		VectorClock clock = group.getClock();
 		

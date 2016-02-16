@@ -32,5 +32,13 @@ public class LogicClock implements Clock {
 		counter++;
 	}
 
+	@Override
+	public void printTimestamp() {
+		System.out.println(counter);
+		
+	}
+	
+	
+
 
 }

@@ -9,6 +9,7 @@ import java.util.concurrent.LinkedBlockingQueue;
 import clockService.Clock;
 import clockService.ClockFactory;
 import config.ConfigParser;
+import config.GroupMessage;
 import config.Message;
 import config.Server;
 
@@ -132,10 +133,9 @@ public class MessagePasser {
 	 * Handled by the multicast controller
 	 * @param message
 	 */
-	public void multicast(Message message){
+	public void multicast(GroupMessage message){
 		message.set_seqNum(sequenceNumber++);
 		message.set_source(localServer.getName());
-		message.setKind("multicast");
 		try {
 			multicastController.multicast(message);
 		} catch (InterruptedException e) {
@@ -167,5 +167,6 @@ public class MessagePasser {
 	 */
 	public void triggerEvent(){
 		clock.increment();
+		clock.printTimestamp();
 	}
 }

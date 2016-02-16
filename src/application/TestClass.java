@@ -1,5 +1,6 @@
 package application;
 
+import config.GroupMessage;
 import config.Message;
 import core.MessagePasser;
 
@@ -38,13 +39,6 @@ public class TestClass {
 		}
 		Map<String, Object> values = (Map<String, Object>) yaml.load(input);
 		localName = (String) values.get("name");
-		final ArrayList<Message> sendMessages = new ArrayList<Message>();
-		ArrayList<Map<String, String>> msgs = (ArrayList<Map<String, String>>) values.get("send");
-		for(Map<String, String> msg: msgs){
-			sendMessages.add(new Message(msg.get("dest"), msg.get("kind"), msg.get("data")));
-		}
-		// Get all the messages to send
-		// System.out.println(sendMessages);
 		
 		// Start the application
 		// Receiver thread
@@ -65,28 +59,44 @@ public class TestClass {
 	            	// TYPE, MSG DEST, MSG TYPE, MSG DATA
 	            	// 1 as receive, other all send
 	            	String[] line = sc.nextLine().split(" ");
-	            	if(line[0].equals("1")){
-	            		//receive
-	            		Message msg = mp.receive();
-	            		if(msg != null){
-	            			System.out.println("Recieve in the application " + localName + " : " + msg);
-	            		}else{
-	            			System.out.println("No Messages received yet!");
-	            		}
-	            		continue;
+	            	
+	            	switch(line[0]) {
+		            	case "s" : {
+		            		StringBuffer buffer = new StringBuffer();
+			            	for(int i = 3; i< line.length; i++){
+			            		buffer.append(" ");
+			            		buffer.append(line[i]);
+			            	}
+			            	Message msg = new Message(line[1], line[2], buffer.toString());
+			            	mp.send(msg);
+			            	System.out.println("Sent Message: " + msg);
+			            	break;
+		            	}
+		            	case "r" : {
+		            		Message msg = mp.receive();
+		            		if(msg != null){
+		            			System.out.println("Recieve in the application " + localName + " : " + msg);
+		            		}else{
+		            			System.out.println("No Messages received yet!");
+		            		}
+		            		continue;
+		            	}
+		            	case "e" : {
+		            		mp.triggerEvent();
+		            		break;
+		            	}
+		            	case "m" : {
+		            		StringBuffer buffer = new StringBuffer();
+			            	for(int i = 3; i< line.length; i++){
+			            		buffer.append(" ");
+			            		buffer.append(line[i]);
+			            	}
+			            	GroupMessage msg = new GroupMessage(line[1], line[2], buffer.toString());
+			            	mp.send(msg);
+			            	System.out.println("Multicast Message: " + msg);
+			            	break;
+		            	}
 	            	}
-	            	if(line.length < 3){
-	            		System.out.println("Not enough arguments!");
-	            		continue;
-	            	}
-	            	StringBuffer buffer = new StringBuffer();
-	            	for(int i = 3; i< line.length; i++){
-	            		buffer.append(" ");
-	            		buffer.append(line[i]);
-	            	}
-	            	Message msg = new Message(line[1], line[2], buffer.toString());
-	            	mp.send(msg);
-	            	System.out.println("Sent Message: " + msg);
             	}
             }
         };

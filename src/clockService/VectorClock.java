@@ -1,5 +1,6 @@
 package clockService;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 
 import config.Timestamp;
@@ -45,6 +46,12 @@ public class VectorClock implements Clock {
 	
 	public Integer[] getTimeStamp(){
 		return counter.clone();
+	}
+
+	@Override
+	public void printTimestamp() {
+		System.out.println(Arrays.toString(counter));
+		
 	}
 	
 }

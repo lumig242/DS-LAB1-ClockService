@@ -15,4 +15,6 @@ public interface Clock {
 	public void setTimeReceive(Timestamp timeStamp);
 	
 	public void increment();
+	
+	public void printTimestamp();
 }
