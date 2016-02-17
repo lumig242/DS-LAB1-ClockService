@@ -42,6 +42,7 @@ public class GroupMessage extends Message{
 			   " group@" + groupName + 
 			   " dest@" + super.getDest() + 
 			   " source@" + super.getSource() +
+			   " originalSource@" + this.getOriginSource() +
 			   " kind@" + this.getKind() +
 			   " timestamp" + this.getTimestamp() +
 			   " data@" + super.getPayload();

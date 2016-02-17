@@ -25,7 +25,8 @@ sendRules :
     src    : a
     kind   : delay
   - action : drop
-    src    : a
+    src    : alice
+    dest   : bob
     kind   : drop
   - action : dropAfter
     src    : a

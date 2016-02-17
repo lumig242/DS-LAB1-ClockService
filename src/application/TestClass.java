@@ -46,7 +46,7 @@ public class TestClass {
 		final MessagePasser mp = new MessagePasser("Configuration.yaml", localName, clockType);
         try {
         	System.out.println("Waiting for all the nodes to be set!");
-			Thread.sleep(5);
+			Thread.sleep(5000);
 		} catch (InterruptedException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

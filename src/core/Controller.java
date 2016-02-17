@@ -85,8 +85,10 @@ public final class Controller {
 	public void deliverReceiveMessage(Message msg) throws InterruptedException{
 		if(!(msg instanceof GroupMessage)) {
 			// Update the system clock
-			clock.setTimeReceive(msg.getTimestamp());
-			receiveMsgs.put(msg);
+			if(!msg.getKind().equals("Init")){
+				clock.setTimeReceive(msg.getTimestamp());
+				receiveMsgs.put(msg);
+			}
 		}else{
 			multicstController.handleMulticastReceiveMessage(msg);
 		}

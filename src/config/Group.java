@@ -45,7 +45,7 @@ public class Group {
 			return true;
 		}
 		// If is an early message
-		int j = groupMember.indexOf(msg.getSource());
+		int j = groupMember.indexOf(((GroupMessage) msg).getOriginSource());
 		if(msg.getTimestamp().getVectorTime()[j] <= groupClock.getTimeStamp()[j]){
 			return true;
 		}

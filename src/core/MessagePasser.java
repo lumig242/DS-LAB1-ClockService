@@ -104,6 +104,20 @@ public class MessagePasser {
 		// Start a consumer thread to send all the messages in the queue
 		new Thread(new SendConsumerThread(sendMsgs, config)).start();
 		
+		
+		try {
+			Thread.sleep(5000);
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		// Pair all the nodes in advance
+		for(String s: config.getAllServers()){
+			if(s.compareTo(local_name) > 0){
+				Message initMessage = new Message(s, "Init", "");
+				send(initMessage);
+			}
+		}
 	}
 	
 	/**
@@ -113,11 +127,12 @@ public class MessagePasser {
 	 * @param message
 	 */
 	public void send(Message message){
-		
-		// Attach timestamp
-		message.setTimestamp(clock.getTimestampSend());
-		//System.out.println("Attached " + message.getTimestamp());
-		message.set_seqNum(sequenceNumber++);
+		if(!message.getKind().equals("Init")){
+			// Attach timestamp
+			message.setTimestamp(clock.getTimestampSend());
+			//System.out.println("Attached " + message.getTimestamp());
+			message.set_seqNum(sequenceNumber++);
+		}
 		message.set_source(localServer.getName());
 		
 		// 
@@ -162,6 +177,10 @@ public class MessagePasser {
 		// May change this to receiveMsgs.take() to make it unblock
 		try {
 			msg = receiveMsgs.take();
+			if((msg instanceof GroupMessage) && 
+					!config.checkAndAddReceiveMessage((GroupMessage)msg)){
+				return receive();
+			}
 			//System.out.println(receiveMsgs);
 			return msg;
 		} catch (InterruptedException e) {

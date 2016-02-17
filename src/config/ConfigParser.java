@@ -6,6 +6,7 @@ import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 
@@ -24,6 +25,7 @@ public class ConfigParser {
 	private List<String> serverNameList = new ArrayList<>();
 	private Map<String, Group> groups = new HashMap<>();
 	private String filename, local_name;
+	private List<GroupMessage> messageReceived = new ArrayList<>();
 	public String getLocal_name() {
 		return local_name;
 	}
@@ -98,6 +100,10 @@ public class ConfigParser {
 	
 	public int getIndexOfServer(String serverName){
 		return serverNameList.indexOf(serverName);
+	}
+	
+	public List<String> getAllServers(){
+		return serverNameList;
 	}
 	
 	/**
@@ -189,7 +195,14 @@ public class ConfigParser {
 	}
 	
 	
-
+	public Boolean checkAndAddReceiveMessage(GroupMessage gmsg){
+		if(messageReceived.contains(gmsg)){
+			return false;
+		}
+		messageReceived.add(gmsg);
+		//System.out.println(gmsg);
+		return true;
+	}
 	
 }
 

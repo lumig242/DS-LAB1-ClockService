@@ -85,6 +85,7 @@ public class MulticastController {
 				while(group.readyToDeliver()){
 					Message deliverMsg = group.fetchOneMessage();
 					deliverMessage(deliverMsg);
+
 				}
 			} catch (InterruptedException e) {
 				// TODO Auto-generated catch block
