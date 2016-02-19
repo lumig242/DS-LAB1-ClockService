@@ -22,21 +22,17 @@ configuration :
 # May be changed for further communication as usual
 sendRules :
   - action : delay
-    src    : a
+    src    : alice
     kind   : delay
   - action : drop
     src    : alice
-    dest   : bob
+    dest   : charlie
     kind   : drop
-  - action : dropAfter
-    src    : a
-    kind   : dropAfter  
-    seqNum : 8
 receiveRules :
-  - action : dropAfter
-    src    : a
-    kind   : dropAfter  
-    seqNum : 8
+  - action : drop
+    src    : alice
+    dest   : bob
+    kind   : drop2
 groups :
   - name : Group1
     members :
@@ -46,8 +42,7 @@ groups :
   - name : Group2
     members :
       - daphnie
-      - bob
-      - charlie
+
 # A single, top-level section in the YAML file
 # Group names must be unique
 # Any number of members in the group

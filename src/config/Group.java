@@ -114,7 +114,7 @@ public class Group {
 	public Message fetchOneMessage(){
 		Message deliverMsg = holdBackMsgs.get(0);
 		holdBackMsgs.remove(0);
-		int j = groupMember.indexOf(deliverMsg.getSource());
+		int j = groupMember.indexOf(((GroupMessage)deliverMsg).getOriginSource());
 		groupClock.incrementAt(j);
 		return deliverMsg;
 	}

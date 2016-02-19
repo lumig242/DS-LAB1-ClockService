@@ -51,6 +51,7 @@ public class MulticastController {
 					GroupMessage sendMsg = new GroupMessage(gmsg);				
 					sendMsg.setDest(config.getLocal_name());
 					controller.handleReceiveMessgae(sendMsg);
+					//receiveMsgs.add(msg);
 				}
 			}
 		}
