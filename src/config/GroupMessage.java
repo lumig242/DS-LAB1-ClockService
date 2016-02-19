@@ -15,7 +15,7 @@ public class GroupMessage extends Message{
 	public void setOriginSource(String originSource) {
 		this.originSource = originSource;
 	}
-
+	
 	public GroupMessage(String groupName, String kind, Object payload) {
 		super(null, kind, payload);
 		this.groupName = groupName;

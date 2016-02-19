@@ -8,6 +8,7 @@ import java.util.concurrent.LinkedBlockingQueue;
 
 import clockService.Clock;
 import clockService.ClockFactory;
+import clockService.LogicClock;
 import clockService.VectorClock;
 import config.ConfigParser;
 import config.Group;
@@ -25,6 +26,7 @@ public class MessagePasser {
 	private Server localServer;
 	public Controller controller;
 	public Clock clock;
+	public static LogicClock logicClock;
 	public MulticastController multicastController;
 	private LinkedBlockingQueue<Message> sendMsgs = new LinkedBlockingQueue<Message>();
 	private LinkedBlockingQueue<Message> delaySendMsgs = new LinkedBlockingQueue<Message>();
@@ -49,7 +51,9 @@ public class MessagePasser {
 		}else{
 			clock = ClockFactory.getClockInstance(clockType, config.getProcessSize(), config.getIndexOfServer(local_name));
 		}
+		logicClock = new LogicClock();
 		localServer = config.getServer(local_name);
+		
 		// Refined in lab1
 		// Add a controller to remove duplicate code
 		controller = new Controller(config, receiveMsgs, delayReceiveMsgs, sendMsgs, delaySendMsgs, clock);

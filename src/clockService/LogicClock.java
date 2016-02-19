@@ -15,7 +15,7 @@ public class LogicClock implements Clock {
 	
 	@Override
 	public Timestamp getTimestampSend() {
-		System.out.println("COUNTER SEND" + counter);
+		//System.out.println("COUNTER SEND" + counter);
 		increment();
 		return new Timestamp(counter);
 	}
