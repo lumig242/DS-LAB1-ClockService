@@ -42,6 +42,7 @@ groups :
   - name : Group2
     members :
       - daphnie
+      - alice
 
 # A single, top-level section in the YAML file
 # Group names must be unique

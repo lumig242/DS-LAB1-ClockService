@@ -24,6 +24,8 @@ public class ConfigParser {
 	private List<Rule> receiveRules = new ArrayList<>();
 	private List<String> serverNameList = new ArrayList<>();
 	private Map<String, Group> groups = new HashMap<>();
+	private List<String> localGroupList = new ArrayList<>();
+
 	private String filename, local_name;
 	private List<GroupMessage> messageReceived = new ArrayList<>();
 	public String getLocal_name() {
@@ -57,11 +59,14 @@ public class ConfigParser {
 		parseRules((List<Map<String, Object>>)values.get("receiveRules"), receiveRules);
 		parseGroups((List<Map<String, Object>>)values.get("groups"), groups);
 		processSize = (int) values.get("processSize");
+		parseLocalGroupList(groups, localGroupList);
+		
+		
 		//System.out.println(servers);
 		//System.out.println(sendRules);
 		//System.out.println(receiveRules);
 		//System.out.println(processSize);
-		System.out.println(groups);
+		System.out.println(localGroupList);
 	}
 	
 	public void reconfiguration(){
@@ -204,5 +209,25 @@ public class ConfigParser {
 		return true;
 	}
 	
+	/**
+	 * Get all the group names that local node belongs to
+	 * @param groups
+	 * @param grouplist
+	 */
+	public void parseLocalGroupList(Map<String, Group> groups, List<String> grouplist){
+		for(String groupName: groups.keySet()){
+			if(groups.get(groupName).getGroupMember().contains(local_name)){
+				grouplist.add(groupName);
+			}
+		}
+	}
+	
+	public List<String> getLocalGroupList() {
+		return localGroupList;
+	}
 }
+
+
+
+
 

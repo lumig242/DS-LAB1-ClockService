@@ -26,7 +26,7 @@ public class MessagePasser {
 	private Server localServer;
 	public Controller controller;
 	public Clock clock;
-	public static LogicClock logicClock;
+	public static LogicClock lockMsgLogicClock;
 	public MulticastController multicastController;
 	private LinkedBlockingQueue<Message> sendMsgs = new LinkedBlockingQueue<Message>();
 	private LinkedBlockingQueue<Message> delaySendMsgs = new LinkedBlockingQueue<Message>();
@@ -51,7 +51,7 @@ public class MessagePasser {
 		}else{
 			clock = ClockFactory.getClockInstance(clockType, config.getProcessSize(), config.getIndexOfServer(local_name));
 		}
-		logicClock = new LogicClock();
+		lockMsgLogicClock = new LogicClock();
 		localServer = config.getServer(local_name);
 		
 		// Refined in lab1
@@ -181,6 +181,7 @@ public class MessagePasser {
 		// May change this to receiveMsgs.take() to make it unblock
 		try {
 			msg = receiveMsgs.take();
+			
 			if((msg instanceof GroupMessage) && 
 					!config.checkAndAddReceiveMessage((GroupMessage)msg)){
 				return receive();

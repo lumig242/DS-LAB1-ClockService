@@ -88,7 +88,7 @@ public final class Controller {
 			if(!msg.getKind().equals("Init")){
 				clock.setTimeReceive(msg.getTimestamp());
 				receiveMsgs.put(msg);
-			}
+			}   
 		}else{
 			multicstController.handleMulticastReceiveMessage(msg);
 		}

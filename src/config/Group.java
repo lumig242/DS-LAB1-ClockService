@@ -8,7 +8,8 @@ public class Group {
 	private String groupName;
 	private ArrayList<String> groupMember;
 	int local_index;
-	private ArrayList<Message> holdBackMsgs = new ArrayList<Message>();
+	private ArrayList<Message> holdBackMsgs = new ArrayList<>();
+	private ArrayList<Message> messageReceived = new ArrayList<>();
 	private VectorClock groupClock;
 	
 	public Group(String groupName, ArrayList<String> groupMember, String local_name){
@@ -50,6 +51,11 @@ public class Group {
 			return true;
 		}
 		
+		// Duplicate message appears due to some synchronizing reason
+		// Hard code here first
+		//if(messageReceived.contains(msg)){
+		//	return true;
+		//}
 		return false;
 	}
 	
@@ -104,6 +110,9 @@ public class Group {
 	 */
 	public void addMessage(Message msg){
 		holdBackMsgs.add(0, msg);
+		//if(!messageReceived.contains(msg)){
+		//	messageReceived.add(msg);
+		//}
 	}
 	
 	/**
@@ -118,6 +127,7 @@ public class Group {
 		groupClock.incrementAt(j);
 		return deliverMsg;
 	}
+
 	
 	@Override
 	public String toString(){
