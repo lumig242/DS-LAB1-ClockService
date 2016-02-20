@@ -28,7 +28,15 @@ public class LockMessage extends GroupMessage implements Comparable{
 		}
 		return this.getOriginSource().compareTo(lmsg.getOriginSource());
 	}
-
+	
+	@Override
+	public boolean equals(Object o){
+		if(!(o instanceof LockMessage)){
+			return false;
+		}
+		return super.equals((GroupMessage) o) && type.equals(((LockMessage)o).getLocktype());
+	}
+	
 	public LOCKTYPE getLocktype(){
 		return type;
 	}

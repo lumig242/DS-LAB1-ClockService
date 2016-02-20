@@ -28,6 +28,7 @@ public class MessagePasser {
 	public Clock clock;
 	public static LogicClock lockMsgLogicClock;
 	public MulticastController multicastController;
+	public LockController lockController;
 	private LinkedBlockingQueue<Message> sendMsgs = new LinkedBlockingQueue<Message>();
 	private LinkedBlockingQueue<Message> delaySendMsgs = new LinkedBlockingQueue<Message>();
 	private LinkedBlockingQueue<Message> receiveMsgs = new LinkedBlockingQueue<Message>();
@@ -55,10 +56,15 @@ public class MessagePasser {
 		localServer = config.getServer(local_name);
 		
 		// Refined in lab1
-		// Add a controller to remove duplicate code
+		// Create all the controllers
 		controller = new Controller(config, receiveMsgs, delayReceiveMsgs, sendMsgs, delaySendMsgs, clock);
 		multicastController = new MulticastController(config, receiveMsgs, controller);
+		lockController = new LockController(multicastController, controller, config);
+		// Set the instance
 		controller.setMulticastController(multicastController);
+		controller.setLockController(lockController);
+		multicastController.setLockController(lockController);
+		
 		// Start the thread to keep listening on port
 		// Start separate thread for all the clients connected
 		Thread t = new Thread(new Runnable() {
@@ -201,5 +207,27 @@ public class MessagePasser {
 	public void triggerEvent(){
 		clock.increment();
 		clock.printTimestamp();
+	}
+	
+	/**
+	 * Enter the critical section
+	 */
+	public void enterCritical(){
+		lockController.enter();
+	}
+	
+	/**
+	 * Leave the critical section
+	 */
+	public void exitCritical(){
+		lockController.exit();
+	}
+	
+	/**
+	 * Check if hold the critical section
+	 * @return
+	 */
+	public Boolean isHoldingCritical(){
+		return lockController.isHoldingCritical();
 	}
 }

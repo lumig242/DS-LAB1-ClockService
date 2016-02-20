@@ -25,6 +25,7 @@ public final class Controller {
 	private LinkedBlockingQueue<Message> sendMsgs;
 	private LinkedBlockingQueue<Message> delaySendMsgs;
 	private MulticastController multicstController;
+	private LockController lockController;
 	private Clock clock;
 	
 	public Controller(ConfigParser config, LinkedBlockingQueue<Message> receiveMsgs, 
@@ -42,6 +43,10 @@ public final class Controller {
 	
 	public void setMulticastController(MulticastController multicastController){
 		this.multicstController = multicastController;
+	}
+	
+	public void setLockController(LockController lockController){
+		this.lockController = lockController;
 	}
 	
 	public void handleReceiveMessgae(Message msg) throws InterruptedException{

@@ -6,6 +6,7 @@ import clockService.VectorClock;
 import config.ConfigParser;
 import config.Group;
 import config.GroupMessage;
+import config.LockMessage;
 import config.Message;
 import config.Timestamp;
 
@@ -13,11 +14,16 @@ public class MulticastController {
 	ConfigParser config;
 	Controller controller;
 	private LinkedBlockingQueue<Message> receiveMsgs;
+	private LockController lockController;
 	
 	public MulticastController(ConfigParser config, LinkedBlockingQueue<Message> receiveMsgs, Controller controller){
 		this.config = config;
 		this.receiveMsgs = receiveMsgs;
 		this.controller = controller;
+	}
+	
+	public void setLockController(LockController lockController){
+		this.lockController = lockController;
 	}
 	
 	/**
@@ -30,7 +36,6 @@ public class MulticastController {
 	public void multicast(Message msg) throws InterruptedException{
 		GroupMessage gmsg = (GroupMessage) msg;
 		Group group = config.getGroup(gmsg.getGroupName());
-		VectorClock clock = group.getClock();
 		gmsg.set_source(config.getLocal_name());
 		// Increment the timestamp only once
 		
@@ -40,7 +45,12 @@ public class MulticastController {
 		for(String destServerName:group.getGroupMember()){
 			if(!destServerName.equals(config.getLocal_name())){
 				// Construct a new message and send it
-				GroupMessage sendMsg = new GroupMessage(gmsg);
+				Message sendMsg;
+				if(gmsg instanceof LockMessage){
+					sendMsg = new LockMessage((LockMessage)gmsg);
+				}else{
+					sendMsg = new GroupMessage(gmsg);
+				}
 				sendMsg.setDest(destServerName);
 				controller.handleSendMessage(sendMsg);
 			}else{
@@ -73,24 +83,29 @@ public class MulticastController {
 		System.out.println("====Receive Multicast: " + group);
 		
 		// check if received
-		if(!group.receiveBefore(gmsg)){
-			try {
-				// Multicast it and record in the holdback queue
-				if(!config.getLocal_name().equals(gmsg.getSource())){
-					multicast(new GroupMessage(gmsg));
+		if(gmsg instanceof LockMessage){
+			lockController.handleLockReceiveMessage((LockMessage)gmsg);
+		}else{
+			if(!group.receiveBefore(gmsg)){
+				try {
+					// Multicast it and record in the holdback queue
+					if(!config.getLocal_name().equals(gmsg.getSource()) &&
+							!config.getLocal_name().equals(gmsg.getOriginSource())){
+						multicast(new GroupMessage(gmsg));
+					}
+					group.addMessage(gmsg);
+					System.out.println("========addMsg" + group);
+					// Deliver all the possible message and
+					// Update the clock
+					while(group.readyToDeliver()){
+						Message deliverMsg = group.fetchOneMessage();
+						deliverMessage(deliverMsg);
+	
+					}
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
 				}
-				group.addMessage(gmsg);
-				System.out.println("========addMsg" + group);
-				// Deliver all the possible message and
-				// Update the clock
-				while(group.readyToDeliver()){
-					Message deliverMsg = group.fetchOneMessage();
-					deliverMessage(deliverMsg);
-
-				}
-			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
 			}
 		}
 	}

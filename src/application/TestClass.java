@@ -107,6 +107,20 @@ public class TestClass {
 			            	System.out.println("Multicast Message: " + msg);
 			            	break;
 		            	}
+		            	case "enter":
+		            		mp.enterCritical();
+		            		break;
+		            	case "exit":
+		            		mp.exitCritical();
+		            		break;
+		            	case "show":
+		            		if(mp.isHoldingCritical()){
+		            			System.out.println("I have the critical section now! Have fun!");
+		            		}else{
+		            			System.out.println("I don't have the section. So sad :( ");
+		            		}
+		            	default:
+		            		continue;
 	            	}
 	            	}catch(Exception e){
 	            		e.printStackTrace();

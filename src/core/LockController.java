@@ -22,8 +22,11 @@ public class LockController {
 	private Controller controller;
 	private ConfigParser config;
 	private Queue<LockMessage> requestQueue;
+	private List<LockMessage> receiveBefore = new ArrayList<>();
 	private int replyCount;
 	private int groupmemberNo;
+	
+	private static int seqNumber = 0;
 	
 	public LockController(MulticastController mController, Controller controller, ConfigParser config) {
 		this.multicastController = mController;
@@ -75,6 +78,9 @@ public class LockController {
 	public void replyMessage(String dest) {
 		LockMessage replyMessage = new LockMessage("message", "reply","payload", LockMessage.LOCKTYPE.REPLY);
 		replyMessage.setDest(dest);
+		replyMessage.setOriginSource(config.getLocal_name());
+		replyMessage.set_source(config.getLocal_name());
+		replyMessage.set_seqNum(seqNumber++);
 		try {
 			controller.handleSendMessage(replyMessage);
 		} catch (InterruptedException e) {
@@ -91,15 +97,17 @@ public class LockController {
 		//multicast request
 		Timestamp timestamp = MessagePasser.lockMsgLogicClock.getTimestampSend();
 		for(String groupName: config.getLocalGroupList()){
-			LockMessage lmsg = new LockMessage(groupName, "request", "payload", locktype);
+			LockMessage lmsg = new LockMessage(groupName, "kind", "payload", locktype);
 			lmsg.setOriginSource(config.getLocal_name());
 			lmsg.setTimestamp(timestamp);
+			lmsg.set_seqNum(seqNumber);
 			try {
 				multicastController.multicast(lmsg);
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}
 		}
+		seqNumber ++;
 	}
 	
 	/**
@@ -115,6 +123,16 @@ public class LockController {
 	
 	
 	public void handleLockReceiveMessage(LockMessage lmsg){
+		// Ugly remove the duplicate messages
+		if(receiveBefore.contains(lmsg))	return;
+		receiveBefore.add(lmsg);
+		// Reliable multicast
+		try {
+			multicastController.multicast(new LockMessage(lmsg));
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+		// Handle this message
 		LOCKTYPE locktype = lmsg.getLocktype();
 		if(locktype.equals(LOCKTYPE.RELEASE)){
 			receiveRelease();
@@ -124,6 +142,9 @@ public class LockController {
 		}
 		else if(locktype.equals(LOCKTYPE.REPLY)){
 			replyCount--;
+			if(replyCount == 0){
+				state = STATE.HELD;
+			}
 		}
 	}
 }
