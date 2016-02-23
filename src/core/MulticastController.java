@@ -58,7 +58,12 @@ public class MulticastController {
 				// Simulate this behavior by directly receiving it
 				// If I'm in this group
 				if(group.getGroupMember().contains(config.getLocal_name())){
-					GroupMessage sendMsg = new GroupMessage(gmsg);				
+					Message sendMsg;
+					if(gmsg instanceof LockMessage){
+						sendMsg = new LockMessage((LockMessage)gmsg);
+					}else{
+						sendMsg = new GroupMessage(gmsg);
+					}
 					sendMsg.setDest(config.getLocal_name());
 					controller.handleReceiveMessgae(sendMsg);
 					//receiveMsgs.add(msg);
@@ -82,30 +87,27 @@ public class MulticastController {
 		System.out.println("====Receive Multicast: " + gmsg);
 		System.out.println("====Receive Multicast: " + group);
 		
-		// check if received
-		if(gmsg instanceof LockMessage){
-			lockController.handleLockReceiveMessage((LockMessage)gmsg);
-		}else{
-			if(!group.receiveBefore(gmsg)){
-				try {
-					// Multicast it and record in the holdback queue
-					if(!config.getLocal_name().equals(gmsg.getSource()) &&
-							!config.getLocal_name().equals(gmsg.getOriginSource())){
-						multicast(new GroupMessage(gmsg));
-					}
-					group.addMessage(gmsg);
-					System.out.println("========addMsg" + group);
-					// Deliver all the possible message and
-					// Update the clock
-					while(group.readyToDeliver()){
-						Message deliverMsg = group.fetchOneMessage();
-						deliverMessage(deliverMsg);
-	
-					}
-				} catch (InterruptedException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
+
+
+		if(!group.receiveBefore(gmsg)){
+			try {
+				// Multicast it and record in the holdback queue
+				if(!config.getLocal_name().equals(gmsg.getSource()) &&
+						!config.getLocal_name().equals(gmsg.getOriginSource())){
+					multicast(new GroupMessage(gmsg));
 				}
+				group.addMessage(gmsg);
+				System.out.println("========addMsg" + group);
+				// Deliver all the possible message and
+				// Update the clock
+				while(group.readyToDeliver()){
+					Message deliverMsg = group.fetchOneMessage();
+					deliverMessage(deliverMsg);
+
+				}
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
 			}
 		}
 	}

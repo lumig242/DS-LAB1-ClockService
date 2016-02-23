@@ -18,6 +18,16 @@ configuration :
 - name : daphnie
   ip   : ec2-54-152-89-119.compute-1.amazonaws.com
   port : 1987
+- name : ellis
+  ip   : ec2-54-86-212-66.compute-1.amazonaws.com
+  port : 12323
+- name : frank
+  ip   : ec2-54-86-212-66.compute-1.amazonaws.com
+  port : 2567
+- name : gavin
+  ip   : ec2-52-87-206-141.compute-1.amazonaws.com
+  port : 6754
+
 # This is the incoming port on which MP will listen
 # May be changed for further communication as usual
 sendRules :
@@ -37,13 +47,38 @@ groups :
   - name : Group1
     members :
       - alice
-      - bob
-      - charlie
+      - daphnie
+      - ellis
   - name : Group2
     members :
-      - daphnie
+      - bob
       - alice
-
+      - frank
+  - name : Group3
+    members :
+      - charlie
+      - alice
+      - gavin
+  - name : Group4
+    members :
+      - daphnie
+      - bob
+      - charlie
+  - name : Group5
+    members :
+      - ellis
+      - bob
+      - gavin
+  - name : Group6
+    members :
+      - frank
+      - charlie
+      - ellis
+  - name : Group7
+    members :
+      - gavin
+      - daphnie
+      - frank                        
 # A single, top-level section in the YAML file
 # Group names must be unique
 # Any number of members in the group

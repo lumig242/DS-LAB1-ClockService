@@ -25,11 +25,14 @@ public class Timestamp implements Serializable{
 	public Timestamp(Integer counter) {
 		intCounter = counter;
 		type = "logic";
+		vecCounter = new Integer[1];
+		vecCounter[0] = 0;
 	}
 	
 	public Timestamp(Integer[] counter) {
 		vecCounter = counter;
 		type = "vector";
+		intCounter = 0;
 	}
 	
 	/**

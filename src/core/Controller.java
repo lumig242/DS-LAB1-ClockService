@@ -10,6 +10,7 @@ import clockService.Clock;
 import clockService.LogicClock;
 import config.ConfigParser;
 import config.GroupMessage;
+import config.LockMessage;
 import config.Message;
 import config.Rule;
 import config.Server;
@@ -94,8 +95,10 @@ public final class Controller {
 				clock.setTimeReceive(msg.getTimestamp());
 				receiveMsgs.put(msg);
 			}   
-		}else{
+		}else if(!(msg instanceof LockMessage)){
 			multicstController.handleMulticastReceiveMessage(msg);
+		}else{
+			lockController.handleLockReceiveMessage((LockMessage)msg);
 		}
 	}
 	
@@ -112,6 +115,10 @@ public final class Controller {
 		
 		System.out.println("-----Send " + message);
 		Server destServer = config.getServer(message.getDest());
+		if(destServer.getName().equals(config.getLocal_name())){
+			handleReceiveMessgae(message);
+			return;
+		}
 		
 		// if this is the first msg sent
 		// act as the client

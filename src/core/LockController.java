@@ -34,7 +34,8 @@ public class LockController {
 		this.config = config;
 		requestQueue = new PriorityQueue<LockMessage>();
 		for(String gName: config.getLocalGroupList()){
-			groupmemberNo += config.getGroup(gName).getGroupMember().size();
+			groupmemberNo = config.getGroup(gName).getGroupMember().size();
+			break;
 		}
 	}
 	
@@ -106,8 +107,8 @@ public class LockController {
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}
+			seqNumber ++;
 		}
-		seqNumber ++;
 	}
 	
 	/**
@@ -123,28 +124,35 @@ public class LockController {
 	
 	
 	public void handleLockReceiveMessage(LockMessage lmsg){
+		// Handle this message
+		LOCKTYPE locktype = lmsg.getLocktype();
+		if(locktype.equals(LOCKTYPE.REPLY)){
+			replyCount--;
+			if(replyCount == 0){
+				state = STATE.HELD;
+			}
+			return;
+		}
+		
 		// Ugly remove the duplicate messages
 		if(receiveBefore.contains(lmsg))	return;
 		receiveBefore.add(lmsg);
-		// Reliable multicast
-		try {
-			multicastController.multicast(new LockMessage(lmsg));
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-		}
-		// Handle this message
-		LOCKTYPE locktype = lmsg.getLocktype();
+		
 		if(locktype.equals(LOCKTYPE.RELEASE)){
 			receiveRelease();
 		}
 		else if(locktype.equals(LOCKTYPE.REQUEST)){
 			receiveRequest(lmsg);
 		}
-		else if(locktype.equals(LOCKTYPE.REPLY)){
-			replyCount--;
-			if(replyCount == 0){
-				state = STATE.HELD;
+		
+		if(!lmsg.getOriginSource().equals(config.getLocal_name()) && !lmsg.getSource().equals(config.getLocal_name())){
+			// Reliable multicast
+			try {
+				multicastController.multicast(new LockMessage(lmsg));
+			} catch (InterruptedException e) {
+				e.printStackTrace();
 			}
 		}
+		return;
 	}
 }
