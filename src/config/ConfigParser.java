@@ -26,11 +26,8 @@ public class ConfigParser {
 	private Map<String, Group> groups = new HashMap<>();
 	private List<String> localGroupList = new ArrayList<>();
 
-	private String filename, local_name;
+	private String filename, local_name, local_group_name;
 	private List<GroupMessage> messageReceived = new ArrayList<>();
-	public String getLocal_name() {
-		return local_name;
-	}
 
 	private static long CONFIG_FILE_LAST_MODIFIED;
 	private File configFile;
@@ -67,6 +64,7 @@ public class ConfigParser {
 		//System.out.println(receiveRules);
 		//System.out.println(processSize);
 		System.out.println(localGroupList);
+		System.out.println(local_group_name);
 	}
 	
 	public void reconfiguration(){
@@ -219,12 +217,23 @@ public class ConfigParser {
 			if(groups.get(groupName).getGroupMember().contains(local_name)){
 				grouplist.add(groupName);
 			}
+			if(groups.get(groupName).getGroupMember().get(0).equals(local_name)){
+				local_group_name = groupName;
+			}
 		}
 	}
 	
 	public List<String> getLocalGroupList() {
 		return localGroupList;
 	}
+	
+	public String getLocal_name() {
+		return local_name;
+	}
+	
+    public String getLocal_group_name(){
+    	return local_group_name;
+    }
 }
 
 

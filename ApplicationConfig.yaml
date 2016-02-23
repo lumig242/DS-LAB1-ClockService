@@ -6,7 +6,7 @@
 # These names will be used for src and dest addresses for the Message
 # The local node’s name is included in this list
 name :
-  alice
+  gavin
 
 send :
   - dest   : bob

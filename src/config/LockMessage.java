@@ -40,4 +40,11 @@ public class LockMessage extends GroupMessage implements Comparable{
 	public LOCKTYPE getLocktype(){
 		return type;
 	}
+	
+	@Override
+	public String toString() {
+		// TODO Auto-generated method stub
+		return super.toString() + 
+				" Type: " + type;
+	}
 }

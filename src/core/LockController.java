@@ -33,19 +33,18 @@ public class LockController {
 		this.controller = controller;
 		this.config = config;
 		requestQueue = new PriorityQueue<LockMessage>();
-		for(String gName: config.getLocalGroupList()){
-			groupmemberNo = config.getGroup(gName).getGroupMember().size();
-			break;
-		}
+		groupmemberNo = config.getGroup(config.getLocal_group_name()).getGroupMember().size();
+			
+		
 	}
 	
 	public void enter() {
 		this.state = STATE.WANTED;
-		notifyGroup(LOCKTYPE.REQUEST);
-		
 		//wait
 		// set a global counter as K, when receiving reply, k--, until k==0, alter state as HELD.
 		replyCount = groupmemberNo;
+
+		notifyGroup(LOCKTYPE.REQUEST);		
 	}
 	
 	public void receiveRequest(LockMessage lmsg) {
@@ -58,7 +57,7 @@ public class LockController {
 	}
 	
 	public void exit() {
-		if(!state.equals(STATE.RELEASED)){
+		if(!state.equals(STATE.HELD)){
 			System.out.println("Currently not in the critical section!");
 			return;
 		}
@@ -97,18 +96,17 @@ public class LockController {
 	private void notifyGroup(LOCKTYPE locktype){
 		//multicast request
 		Timestamp timestamp = MessagePasser.lockMsgLogicClock.getTimestampSend();
-		for(String groupName: config.getLocalGroupList()){
-			LockMessage lmsg = new LockMessage(groupName, "kind", "payload", locktype);
-			lmsg.setOriginSource(config.getLocal_name());
-			lmsg.setTimestamp(timestamp);
-			lmsg.set_seqNum(seqNumber);
-			try {
-				multicastController.multicast(lmsg);
-			} catch (InterruptedException e) {
-				e.printStackTrace();
-			}
-			seqNumber ++;
+		String groupName = config.getLocal_group_name();
+		LockMessage lmsg = new LockMessage(groupName, "kind", "payload", locktype);
+		lmsg.setOriginSource(config.getLocal_name());
+		lmsg.setTimestamp(timestamp);
+		lmsg.set_seqNum(seqNumber);
+		try {
+			multicastController.multicast(lmsg);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
 		}
+		seqNumber ++;
 	}
 	
 	/**
@@ -124,13 +122,17 @@ public class LockController {
 	
 	
 	public void handleLockReceiveMessage(LockMessage lmsg){
+		System.out.println("-=-=-=Receive Lock Message" + lmsg);
 		// Handle this message
 		LOCKTYPE locktype = lmsg.getLocktype();
 		if(locktype.equals(LOCKTYPE.REPLY)){
+			System.out.println("Handle Reply");
 			replyCount--;
 			if(replyCount == 0){
 				state = STATE.HELD;
 			}
+			System.out.println(replyCount + " reply counts to gather.");
+			System.out.println("Current status: " + state);
 			return;
 		}
 		
