@@ -39,6 +39,10 @@ public class LockController {
 	}
 	
 	public void enter() {
+		if(!this.state.equals(STATE.RELEASED)){
+			System.out.println("I cannot request the sectoin again!");
+			return;
+		}
 		this.state = STATE.WANTED;
 		//wait
 		// set a global counter as K, when receiving reply, k--, until k==0, alter state as HELD.
@@ -97,7 +101,7 @@ public class LockController {
 		//multicast request
 		Timestamp timestamp = MessagePasser.lockMsgLogicClock.getTimestampSend();
 		String groupName = config.getLocal_group_name();
-		LockMessage lmsg = new LockMessage(groupName, "kind", "payload", locktype);
+		LockMessage lmsg = new LockMessage(groupName, "notify", "payload", locktype);
 		lmsg.setOriginSource(config.getLocal_name());
 		lmsg.setTimestamp(timestamp);
 		lmsg.set_seqNum(seqNumber);

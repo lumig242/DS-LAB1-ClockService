@@ -32,8 +32,8 @@ configuration :
 # May be changed for further communication as usual
 sendRules :
   - action : delay
-    src    : alice
-    kind   : delay
+    src    : bob
+    kind   : reply
   - action : drop
     src    : alice
     dest   : charlie
@@ -85,4 +85,4 @@ groups :
 # As many groups as you’d like 
  
 # To Specify the total number of proccesses
-processSize: 4
+processSize: 7
