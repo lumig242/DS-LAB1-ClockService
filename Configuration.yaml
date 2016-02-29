@@ -33,7 +33,7 @@ configuration :
 sendRules :
   - action : delay
     src    : bob
-    kind   : reply
+    kind   : notify
   - action : drop
     src    : alice
     dest   : charlie
