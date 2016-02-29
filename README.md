@@ -1,4 +1,4 @@
-# ClockService
+# Distributed System Labs
 This is all the labs for cmu18842 distributed system.
 
 In lab 0, we built a message passer on top of tcp connections. 
